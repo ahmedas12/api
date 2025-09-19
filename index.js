@@ -1,21 +1,19 @@
 // index.js
 import express from "express";
-import path from "path";
-import { fileURLToPath } from "url";
-import { v4 as uuidv4 } from "uuid";
+// ...existing code...
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// ...existing code...
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json()); // parse JSON bodies
-app.use(express.static(path.join(__dirname, "public"))); // serve ./public
+// app.use(express.static(path.join(__dirname, "public"))); // serve ./public
 
 // In-memory store for students
 const students = [];
+let studentIdCounter = 1;
 
 // Validation function
 function validateStudent({ name, age, course, year }) {
@@ -49,7 +47,7 @@ app.post("/students", (req, res) => {
   if (!v.ok) return res.status(400).json({ error: v.msg });
 
   const newStudent = {
-    id: uuidv4(),
+    id: studentIdCounter++,
     name: String(name).trim(),
     age: Number(age),
     course: String(course).trim(),
