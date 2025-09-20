@@ -1,3 +1,59 @@
+// GET /api/recipes - Return all recipes
+app.get("/api/recipes", (req, res) => {
+  let recipes = [];
+  try {
+    const data = fs.readFileSync(recipesFile, "utf8");
+    recipes = JSON.parse(data);
+    if (!Array.isArray(recipes)) recipes = [];
+  } catch (e) {
+    return res.status(500).json({ error: "Could not read recipes." });
+  }
+  return res.json(recipes);
+});
+import fs from "fs";
+import path from "path";
+import cors from "cors";
+// Enable CORS for all routes
+app.use(cors());
+// Helper to get recipes file path
+const recipesFile = path.join(process.cwd(), "data", "recipes.json");
+// POST /api/recipes - Add new recipe
+app.post("/api/recipes", (req, res) => {
+  const { title, ingredients, instructions, cookTime, difficulty } = req.body;
+  // Validation
+  if (!title || !ingredients || !instructions) {
+    return res.status(400).json({ error: "Missing required fields (title, ingredients, instructions)." });
+  }
+  if (String(title).trim() === "" || String(ingredients).trim() === "" || String(instructions).trim() === "") {
+    return res.status(400).json({ error: "Fields cannot be blank." });
+  }
+  // Read existing recipes
+  let recipes = [];
+  try {
+    const data = fs.readFileSync(recipesFile, "utf8");
+    recipes = JSON.parse(data);
+  } catch (e) {
+    recipes = [];
+  }
+  // Create new recipe
+  const newRecipe = {
+    id: Date.now(),
+    title: String(title).trim(),
+    ingredients: String(ingredients).trim(),
+    instructions: String(instructions).trim(),
+    cookTime: cookTime ? String(cookTime).trim() : "",
+    difficulty: difficulty ? String(difficulty).trim() : "medium",
+    createdAt: new Date().toISOString()
+  };
+  recipes.push(newRecipe);
+  // Save to file
+  try {
+    fs.writeFileSync(recipesFile, JSON.stringify(recipes, null, 2));
+  } catch (e) {
+    return res.status(500).json({ error: "Failed to save recipe." });
+  }
+  return res.status(201).json({ message: "Recipe added", recipe: newRecipe });
+});
 // index.js
 import express from "express";
 // ...existing code...

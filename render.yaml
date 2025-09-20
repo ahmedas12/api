@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: api
+    env: node
+    buildCommand: "yarn install"
+    startCommand: "yarn start"
+    envVars:
+      - key: NODE_VERSION
+        value: 22.16.0
+    autoDeploy: true
